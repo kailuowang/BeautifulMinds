@@ -16,24 +16,15 @@ build-type:          Simple
 -- extra-source-files:
 cabal-version:       >=1.10
 
-executable beautifulMinds
-  main-is:             Main.hs
-  ghc-options:         -rtsopts -O2
-  build-depends:       base,
-                       BeautifulMinds,
-                       bytestring,
-                       cassava
-  hs-source-dirs:      src
-  default-language:    Haskell2010
-
 test-suite tests
   ghc-options:         -Wall
   type:                exitcode-stdio-1.0
   main-is:             Tests.hs
   hs-source-dirs:      tests
-  build-depends:       base,
+  build-depends:       base >= 4.7 && < 5,
                        BeautifulMinds,
-                       hspec >= 2.0 && < 2.1
+                       hspec >= 2.0 && < 2.2,
+                       hspec-discover
   default-language:    Haskell2010
 
 
@@ -41,8 +32,6 @@ library
   ghc-options:         -Wall
   exposed-modules:     BeautifulMinds
   build-depends:       base >= 4.7 && <5,
-                       bytestring,
-                       vector,
-                       cassava
+                       vector
   hs-source-dirs:      src
   default-language:    Haskell2010
