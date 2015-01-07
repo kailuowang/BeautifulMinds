@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 module WeightedSlopeOne (Rating, SlopeOne, empty, predict, update) where
 
 import Data.List (foldl',foldl1')
