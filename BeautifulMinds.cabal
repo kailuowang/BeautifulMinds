@@ -41,13 +41,14 @@ test-suite tests
   build-depends:       base >= 4.7 && < 5,
                        BeautifulMinds,
                        hspec >= 2.0 && < 2.2,
-                       hspec-discover
+                       hspec-discover,
+                       containers
   default-language:    Haskell2010
 
 
 library
   ghc-options:         -Wall -XBangPatterns
-  exposed-modules:     BeautifulMinds
+  exposed-modules:     BeautifulMinds, WeightedSlopeOne
   build-depends:       base >= 4.7 && <5,
                        vector,
                        containers
