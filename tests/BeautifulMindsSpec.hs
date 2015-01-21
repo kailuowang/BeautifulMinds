@@ -10,8 +10,8 @@ import qualified Data.HashMap.Lazy as M
 
 spec :: Spec
 spec = do
-  describe "store neo4j " $ do
-    it "store a vertice as photographer" $ do
-      node <- savePhotographer "23"
-      let pid = (getNodeProperties node) M.! "id"
-      pid `shouldBe` (ValueProperty $ TextVal "23")
+  describe "record fave " $ do
+    it "store the relationship" $ do
+      faveRel <- recordFave ("favedby", 3, "aPhotographer", "aPhoto")
+      let rating = getRelProperties faveRel M.! "rating"
+      rating `shouldBe` (ValueProperty $ IntVal 3)
