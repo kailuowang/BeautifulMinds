@@ -5,7 +5,7 @@ import Database.Neo4j
 import qualified Data.HashMap.Lazy as M
 import Data.Text
 import Data.Int (Int64)
-
+import Data.Maybe (listToMaybe)
 type FaveRating = Int64
 type PhotographerId = Text
 type PhotoId = Text
@@ -17,6 +17,9 @@ recordFave (favedBy, rating, photographerId, photoId) = perform $ do
   by <- savePhotographer favedBy
   photo <- savePhoto photoId photographerId
   favePhoto rating photo by
+
+getPhotographer :: PhotographerId -> Neo4j (Maybe Node)
+getPhotographer pid = fmap listToMaybe $ getNodesByLabelAndProperty "Photographer" $ Just ("id" |: pid)
 
 
 savePhotographer :: PhotographerId -> Neo4j Node
