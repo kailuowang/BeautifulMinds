@@ -1,17 +1,22 @@
 {-# LANGUAGE OverloadedStrings #-}
-module BeautifulMinds(recordFave, perform) where
+module BeautifulMinds(recordFave, recordFollow, recommendPhotographer, perform) where
 import WeightedSlopeOne
 import Database.Neo4j
 import qualified Data.HashMap.Lazy as M
-import Data.Text
+import qualified Data.Text as T
 import Data.Int (Int64)
+import qualified Data.Aeson.Types as DAT
 import Data.Maybe (listToMaybe)
+import qualified Database.Neo4j.Transactional.Cypher as TC
+
 type FaveRating = Int64
-type PhotographerId = Text
-type PhotoId = Text
-type NodeId = Text
+type PhotographerId = T.Text
+type FollowerId = PhotographerId
+type PhotoId = T.Text
+type NodeId = T.Text
 type FavedById = PhotographerId
 type FaveRecord = (FavedById, FaveRating, PhotographerId, PhotoId)
+type FollowRecord = (FollowerId, PhotographerId)
 
 photographerLabel :: Label
 photographerLabel = "Photographer"
@@ -24,6 +29,27 @@ recordFave (favedBy, rating, photographerId, photoId) = perform $ do
   by <- savePhotographer favedBy
   photo <- savePhoto photoId photographerId
   favePhoto rating by photo
+
+recordFollow :: FollowRecord -> IO Relationship
+recordFollow (followerId, photographerId) = perform $ do
+  follower <- savePhotographer followerId
+  photographer <- savePhotographer photographerId
+  updateOrCreate "Follow" follower photographer M.empty
+
+recommendPhotographer :: PhotographerId -> IO [PhotographerId]
+recommendPhotographer userId = perform $ do
+        res <- TC.runTransaction $ do
+            result <- TC.cypher "MATCH (n:Photographer)-[f1:Fave]-> (:Photo) <- [:Takes] - (:Photographer) - [:Fave] -> (:Photo) <- [:Takes] - (target: Photographer) \
+                                \ WHERE n.id={photographerId} and NOT (n)-[:Follow]->(target) \
+                                \ RETURN target.id, count(f1) as c \
+                                \ ORDER BY c DESC" $
+                                 M.fromList [("photographerId", TC.newparam userId)]
+            let vals = TC.vals result
+            return $ fmap head vals
+        let (Right pidVals) = res
+        return $ fmap getPid pidVals
+        where
+          getPid (DAT.String pid) = pid
 
 findById :: Label -> NodeId -> Neo4j (Maybe Node)
 findById label nid =  fmap listToMaybe $ getNodesByLabelAndProperty label $ Just ("id" |: nid)

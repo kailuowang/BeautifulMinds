@@ -21,3 +21,12 @@ spec = do
         return (from, to)
       getNodeProperties user M.! "id" `shouldBe` (ValueProperty $ TextVal "aUser")
       getNodeProperties photo M.! "id" `shouldBe` (ValueProperty $ TextVal "aPhoto")
+
+  describe "recommend photographer" $ do
+    it "returns only unfollowed user" $ do
+      _ <- recordFave ("alf", 3, "jon", "aPhotob")
+      _ <- recordFave ("jon", 3, "already", "1aPhoto")
+      _ <- recordFave ("jon", 3, "new", "aPho2to")
+      _ <- recordFollow ("alf", "already")
+      recommended <- recommendPhotographer "alf"
+      recommended `shouldBe` ["new"]
