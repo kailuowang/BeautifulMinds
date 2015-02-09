@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module BeautifulMinds(recordFave, recordFollow, recommendPhotographer, perform) where
+module FaveGraph(recordFave, recordFollow, FaveRecord, PhotographerId, FavedById, FaveRating, PhotoId, recommendPhotographer, perform) where
 import WeightedSlopeOne
 import Database.Neo4j
 import qualified Data.HashMap.Lazy as M
@@ -22,7 +22,6 @@ photographerLabel :: Label
 photographerLabel = "Photographer"
 photoLabel :: Label
 photoLabel = "Photo"
-
 
 recordFave :: FaveRecord -> IO Relationship
 recordFave (favedBy, rating, photographerId, photoId) = perform $ do
@@ -93,6 +92,7 @@ favePhoto :: FaveRating -> Node -> Node -> Neo4j Relationship
 favePhoto rating by photo = do
   updateOrCreate "Fave" by photo (M.fromList [ "rating" |: rating])
 
+-- find the common elements
 common :: (Eq a) => [a] -> [a] -> [a]
 common xs ys = [ x | x <- xs , y <- ys, x == y]
 

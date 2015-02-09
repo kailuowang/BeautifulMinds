@@ -1,10 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module BeautifulMindsSpec where
+module FaveGraphSpec where
 
 
 import Test.Hspec
-import BeautifulMinds
+import FaveGraph
 import Database.Neo4j
 import qualified Data.HashMap.Lazy as M
 
