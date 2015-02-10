@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings, TemplateHaskell #-}
 
-module Controllers.RecordFave(handleRecordFave) where
+module Controllers.RecordFave(handleRecordFave, handleRecordFollow) where
 
 import           FaveGraph
 import qualified Data.HashMap.Lazy as M
@@ -23,7 +23,14 @@ data FaveRecordRequest =
 
    } deriving (Show)
 
+data FollowRecordRequest =
+  FollowRecordRequest {
+    follower :: PhotographerId,
+    followed :: PhotographerId
+   } deriving (Show)
+
 $(deriveJSON defaultOptions ''FaveRecordRequest)
+$(deriveJSON defaultOptions ''FollowRecordRequest)
 
 handleRecordFave :: Value -> [T.Text] -> IO Response
 handleRecordFave value _ = do
@@ -34,5 +41,17 @@ handleRecordFave value _ = do
              [("Content-Type", "application/json")]
              $ encode $ M.fromList [("status" :: T.Text, "success":: T.Text)]
 
+handleRecordFollow :: Value -> [T.Text] -> IO Response
+handleRecordFollow value _ = do
+        let (Success frr) = fromJSON value
+        relationship <- recordFollow $ toFollowRecord frr
+        return $ responseLBS
+             status200
+             [("Content-Type", "application/json")]
+             $ encode $ M.fromList [("status" :: T.Text, "success":: T.Text)]
+
 toFaveRecord :: FaveRecordRequest -> FaveRecord
 toFaveRecord frr = (favedBy frr, rating frr, photographer frr, photo frr)
+
+toFollowRecord :: FollowRecordRequest -> FollowRecord
+toFollowRecord frr = (follower frr, followed frr)

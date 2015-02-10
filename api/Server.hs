@@ -25,10 +25,11 @@ app :: Application
 app req sendResponse = handle (sendResponse . invalidJson) $ do
     value <- sourceRequestBody req $$ sinkParser json
     let (m,p) = (requestMethod req, pathInfo req)
-    case (m,p) of
-      ("POST", ["faves"]) -> do
-        resp <- liftIO $ handleRecordFave value p
-        sendResponse resp
+    let handler = case (m, p) of
+                    ("POST", ["faves"])   -> handleRecordFave
+                    ("POST", ["follows"]) -> handleRecordFollow
+    resp <- liftIO $ handler value p
+    sendResponse resp
 
 
 invalidJson :: SomeException -> Response
