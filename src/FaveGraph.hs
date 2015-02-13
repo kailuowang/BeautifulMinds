@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module FaveGraph(recordFave, recordFollow, FaveRecord, PhotographerId, FavedById, FaveRating, PhotoId, FollowRecord, recommendPhotographer, perform) where
+module FaveGraph(recommendPhotographer, recordFave, recordFollow, FaveRecord, PhotographerId, FavedById, FaveRating, PhotoId, FollowRecord, perform) where
 import WeightedSlopeOne
 import Database.Neo4j
 import qualified Data.HashMap.Lazy as M

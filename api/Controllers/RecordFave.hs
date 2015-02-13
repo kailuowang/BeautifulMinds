@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings, TemplateHaskell #-}
 
-module Controllers.RecordFave(handleRecordFave, handleRecordFollow) where
+module Controllers.RecordFave(postFaveRecord, postFollowRecord, getRecommendation) where
 
 import           FaveGraph
 import qualified Data.HashMap.Lazy as M
@@ -12,6 +12,7 @@ import           Data.Aeson.Parser        (json)
 import           Data.Aeson.Types
 import           Network.Wai
 import           Network.HTTP.Types       (status200, status400)
+import           Data.ByteString.Lazy     (ByteString)
 
 
 data FaveRecordRequest =
@@ -32,23 +33,23 @@ data FollowRecordRequest =
 $(deriveJSON defaultOptions ''FaveRecordRequest)
 $(deriveJSON defaultOptions ''FollowRecordRequest)
 
-handleRecordFave :: Value -> [T.Text] -> IO Response
-handleRecordFave value _ = do
+postFaveRecord :: Value -> [T.Text] -> IO ByteString
+postFaveRecord value _ = do
         let (Success frr) = fromJSON value
         relationship <- recordFave $ toFaveRecord frr
-        return $ responseLBS
-             status200
-             [("Content-Type", "application/json")]
-             $ encode $ M.fromList [("status" :: T.Text, "success":: T.Text)]
+        return $ encode $ M.fromList [("status" :: T.Text, "success":: T.Text)]
 
-handleRecordFollow :: Value -> [T.Text] -> IO Response
-handleRecordFollow value _ = do
+postFollowRecord :: Value -> [T.Text] -> IO ByteString
+postFollowRecord value _ = do
         let (Success frr) = fromJSON value
         relationship <- recordFollow $ toFollowRecord frr
-        return $ responseLBS
-             status200
-             [("Content-Type", "application/json")]
-             $ encode $ M.fromList [("status" :: T.Text, "success":: T.Text)]
+        return $ encode $ M.fromList [("status" :: T.Text, "success":: T.Text)]
+
+getRecommendation :: Value -> [T.Text] -> IO ByteString
+getRecommendation _ (forId : _) = do
+        recommended <- recommendPhotographer forId
+        return $ encode $ M.fromList [("recommended" :: T.Text, recommended) ]
+
 
 toFaveRecord :: FaveRecordRequest -> FaveRecord
 toFaveRecord frr = (favedBy frr, rating frr, photographer frr, photo frr)

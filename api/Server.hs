@@ -7,8 +7,8 @@ import           Controllers.RecordFave
 import           Data.Aeson               (Value, encode, object, (.=), FromJSON, ToJSON)
 import           Data.Aeson.Parser        (json)
 import           Data.Aeson.Types
+import qualified Data.HashMap.Lazy as M
 
-import           Data.ByteString          (ByteString)
 import           Data.Conduit             (($$))
 import           Data.Conduit.Attoparsec  (sinkParser)
 import           Network.HTTP.Types       (status200, status400)
@@ -26,10 +26,14 @@ app req sendResponse = handle (sendResponse . invalidJson) $ do
     value <- sourceRequestBody req $$ sinkParser json
     let (m,p) = (requestMethod req, pathInfo req)
     let handler = case (m, p) of
-                    ("POST", ["faves"])   -> handleRecordFave
-                    ("POST", ["follows"]) -> handleRecordFollow
-    resp <- liftIO $ handler value p
-    sendResponse resp
+                    ("POST", ["faves"])   -> postFaveRecord
+                    ("POST", ["follows"]) -> postFollowRecord
+                    ("GET", (_ : "recommendations" : _)) -> getRecommendation
+    respContent <- liftIO $ handler value p
+    sendResponse $ responseLBS
+                      status200
+                      [("Content-Type", "application/json")]
+                      respContent
 
 
 invalidJson :: SomeException -> Response
