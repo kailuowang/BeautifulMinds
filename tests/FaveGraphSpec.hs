@@ -7,9 +7,24 @@ import Test.Hspec
 import FaveGraph
 import Database.Neo4j
 import qualified Data.HashMap.Lazy as M
+import qualified Database.Neo4j.Transactional.Cypher as TC
+import Control.Exception
+
+clean :: IO ()
+clean = do
+    _ <- perform $ TC.runTransaction $ TC.cypher "  MATCH (n) \
+                                                \ OPTIONAL MATCH (n)-[r]-() \
+                                                \ DELETE n, r " M.empty
+    return ()
+
+ensureCleanDB :: IO () -> IO ()
+ensureCleanDB action =
+  bracket clean
+          (const clean)
+          (const action)
 
 spec :: Spec
-spec = do
+spec = around_ ensureCleanDB $ do
   describe "record fave " $ do
     it "store the relationship" $ do
       faveRel <- recordFave ("aUser", 3, "aPhotographer", "aPhoto")
