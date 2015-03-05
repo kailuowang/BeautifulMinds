@@ -41,5 +41,4 @@ invalidJson ex = responseLBS
     status400
     [("Content-Type", "application/json")]
     $ encode $ object
-        [ ("message" .= show ex)
-        ]
+        [ ("message" .= show ex) ]
